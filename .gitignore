@@ -9,3 +9,6 @@ pnpm-debug
 auto-*.d.ts
 .idea
 .history
+*.zip
+*.rar
+
