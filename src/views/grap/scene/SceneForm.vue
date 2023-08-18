@@ -1,35 +1,16 @@
 <template>
 	<Dialog v-model="dialogVisible" :title="dialogTitle">
 		<el-form ref="formRef" v-loading="formLoading" :model="formData" :rules="formRules" label-width="auto">
-			<el-form-item label="应用ID" prop="name">
-				<el-input v-model="formData.name" :disabled="isDisable" placeholder="请输入应用ID" />
+			<el-form-item label="场景ID" prop="name">
+				<el-input v-model="formData.name" :disabled="isDisable" placeholder="请输入场景ID" />
 			</el-form-item>
-			<el-form-item label="应用名称" prop="code">
-				<el-input v-model="formData.code" :disabled="isDisable" placeholder="请输入应用名称" />
+			<el-form-item label="场景名称" prop="code">
+				<el-input v-model="formData.code" :disabled="isDisable" placeholder="请输入场景名称" />
 			</el-form-item>
-			<el-form-item label="所属单位" prop="status">
-				<el-select v-model="formData.status" class="!w-240px" clearable placeholder="请选择" :disabled="isDisable">
-					<el-option v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)" :key="dict.value" :label="dict.label" :value="dict.value" />
-				</el-select>
-			</el-form-item>
-			<el-form-item label="科室" prop="status">
-				<el-select v-model="formData.status" class="!w-240px" clearable placeholder="请选择状" :disabled="isDisable">
-					<el-option v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)" :key="dict.value" :label="dict.label" :value="dict.value" />
-				</el-select>
-			</el-form-item>
-			<el-form-item label="联系人" prop="name">
-				<el-input v-model="formData.name" placeholder="请输入" :disabled="isDisable" />
-			</el-form-item>
-			<el-form-item label="手机号" prop="phone">
-				<el-input v-model="formData.phone" maxlength="11" :disabled="isDisable" placeholder="请输入" />
-			</el-form-item>
-			<el-form-item label="应用编辑" prop="sort">
+			<el-form-item label="场景编辑" prop="sort">
 				<el-button :disabled="isDisable">二维场景</el-button>
 				<el-button :disabled="isDisable">三维场景</el-button>
 				<el-button :disabled="isDisable">二三维场景</el-button>
-			</el-form-item>
-			<el-form-item label="备注" prop="remark">
-				<el-input v-model="formData.remark" placeholder="请输备注" type="textarea" :disabled="isDisable" />
 			</el-form-item>
 		</el-form>
 		<template #footer>

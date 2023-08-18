@@ -8,7 +8,6 @@
 							<img :src="avatar" alt="" class="w-70px h-70px rounded-[50%] mr-20px" />
 							<div>
 								<div class="text-20px">{{ t('workplace.welcome') }} {{ t('workplace.happyDay') }}</div>
-								<div class="mt-10px text-14px text-gray-500">{{ t('workplace.toady') }}，20℃ - 32℃！</div>
 							</div>
 						</div>
 					</el-col>

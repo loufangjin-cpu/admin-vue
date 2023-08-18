@@ -52,20 +52,20 @@
 				<Icon class="mr-5px" icon="ep:plus" />
 				新增
 			</el-button>
-			<CustomTabs :curTabIndex="curTabIndex" @showTabs="showTabs"> </CustomTabs>
+			<CustomTabs :curTabIndex="curTabIndex" @showTabs="showTabs" />
 		</div>
 		<template v-if="curTabIndex === 0">
 			<div class="add-box">
-				<ModelSettings></ModelSettings>
-				<ModelSettings></ModelSettings>
-				<ModelSettings></ModelSettings>
-				<ModelSettings></ModelSettings>
-				<ModelSettings></ModelSettings>
-				<ModelSettings></ModelSettings>
-				<ModelSettings></ModelSettings>
-				<ModelSettings></ModelSettings>
-				<ModelSettings></ModelSettings>
-				<ModelSettings></ModelSettings>
+				<ModelSettings />
+				<ModelSettings />
+				<ModelSettings />
+				<ModelSettings />
+				<ModelSettings />
+				<ModelSettings />
+				<ModelSettings />
+				<ModelSettings />
+				<ModelSettings />
+				<ModelSettings />
 			</div>
 		</template>
 		<template v-if="curTabIndex === 1">
@@ -85,9 +85,9 @@
 				<el-table-column :width="300" align="center" label="操作">
 					<template #default="scope">
 						<el-button link type="primary" @click="openForm('details', scope.row.id)"> 详情 </el-button>
-						<el-button link type="primary" @click="openForm('update', scope.row.id)"> 预览 </el-button>
+						<el-button link type="primary"> 预览 </el-button>
 						<el-button link type="primary" @click="openForm('update', scope.row.id)"> 编辑 </el-button>
-						<el-button link type="primary" @click="openForm('update', scope.row.id)"> 发布 </el-button>
+						<el-button link type="primary"> 发布 </el-button>
 						<el-button v-hasPermi="['system:role:delete']" link type="danger" @click="handleDelete(scope.row.id)"> 删除 </el-button>
 					</template>
 				</el-table-column>
@@ -98,11 +98,7 @@
 	</ContentWrap>
 
 	<!-- 表单弹窗：添加/修改 -->
-	<RoleForm ref="formRef" @success="getList" />
-	<!-- 表单弹窗：菜单权限 -->
-	<RoleAssignMenuForm ref="assignMenuFormRef" @success="getList" />
-	<!-- 表单弹窗：数据权限 -->
-	<RoleDataPermissionForm ref="dataPermissionFormRef" @success="getList" />
+	<SceneForm ref="formRef" @success="getList" />
 </template>
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict';
@@ -111,7 +107,7 @@ import download from '@/utils/download';
 import * as RoleApi from '@/api/system/role';
 import CustomTabs from '@/components/CustomTabs/CustomTabsModel.vue';
 import ModelSettings from '@/components/ModelSettings/ModelSettingsModel.vue';
-// import RoleForm from './RoleForm.vue';
+import SceneForm from './SceneForm.vue';
 // import RoleAssignMenuForm from './RoleAssignMenuForm.vue';
 // import RoleDataPermissionForm from './RoleDataPermissionForm.vue';
 
@@ -129,6 +125,14 @@ const queryParams = reactive({
 	code: '',
 	name: '',
 	status: undefined,
+	remark: '',
+	mapId: '',
+	mapName: '',
+	mapState: '',
+	mapType: '',
+	mapFunction: '',
+	mapCode: '',
+	mapThumbnail: '',
 	createTime: [],
 });
 const queryFormRef = ref(); // 搜索的表单
@@ -161,7 +165,10 @@ const resetQuery = () => {
 
 /** 添加/修改操作 */
 const formRef = ref();
-const openForm = (type: string, id?: number) => {};
+const openForm = (type: string, id?: number) => {
+	console.log('type', type, id);
+	formRef.value.open(type, id);
+};
 
 /** 数据权限操作 */
 const dataPermissionFormRef = ref();

@@ -9,7 +9,22 @@
 				<el-input v-model="queryParams.code" class="!w-240px" clearable placeholder="请输入角色标识" @keyup.enter="handleQuery" />
 			</el-form-item>
 			<el-form-item label="所属单位" prop="status">
-				<el-select v-model="queryParams.status" class="!w-240px" clearable placeholder="请选择状态">
+				<el-select v-model="queryParams.status" class="!w-240px" clearable placeholder="请选择">
+					<el-option v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)" :key="dict.value" :label="dict.label" :value="dict.value" />
+				</el-select>
+			</el-form-item>
+			<el-form-item label="科室" prop="status">
+				<el-select v-model="queryParams.status" class="!w-240px" clearable placeholder="请选择状">
+					<el-option v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)" :key="dict.value" :label="dict.label" :value="dict.value" />
+				</el-select>
+			</el-form-item>
+			<el-form-item label="联系人" prop="status">
+				<el-select v-model="queryParams.status" class="!w-240px" clearable placeholder="请选择状">
+					<el-option v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)" :key="dict.value" :label="dict.label" :value="dict.value" />
+				</el-select>
+			</el-form-item>
+			<el-form-item label="手机号" prop="status">
+				<el-select v-model="queryParams.status" class="!w-240px" clearable placeholder="请选择状">
 					<el-option v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)" :key="dict.value" :label="dict.label" :value="dict.value" />
 				</el-select>
 			</el-form-item>
@@ -44,20 +59,20 @@
 				<Icon class="mr-5px" icon="ep:plus" />
 				新增
 			</el-button>
-			<CustomTabs :curTabIndex="curTabIndex" @showTabs="showTabs"> </CustomTabs>
+			<CustomTabs :curTabIndex="curTabIndex" @showTabs="showTabs" />
 		</div>
 		<template v-if="curTabIndex === 0">
 			<div class="add-box">
-				<ModelSettings></ModelSettings>
-				<ModelSettings></ModelSettings>
-				<ModelSettings></ModelSettings>
-				<ModelSettings></ModelSettings>
-				<ModelSettings></ModelSettings>
-				<ModelSettings></ModelSettings>
-				<ModelSettings></ModelSettings>
-				<ModelSettings></ModelSettings>
-				<ModelSettings></ModelSettings>
-				<ModelSettings></ModelSettings>
+				<ModelSettings />
+				<ModelSettings />
+				<ModelSettings />
+				<ModelSettings />
+				<ModelSettings />
+				<ModelSettings />
+				<ModelSettings />
+				<ModelSettings />
+				<ModelSettings />
+				<ModelSettings />
 			</div>
 		</template>
 		<template v-if="curTabIndex === 1">
@@ -103,9 +118,7 @@ import download from '@/utils/download';
 import * as RoleApi from '@/api/system/role';
 import CustomTabs from '@/components/CustomTabs/CustomTabsModel.vue';
 import ModelSettings from '@/components/ModelSettings/ModelSettingsModel.vue';
-// import RoleForm from './RoleForm.vue';
-// import RoleAssignMenuForm from './RoleAssignMenuForm.vue';
-// import RoleDataPermissionForm from './RoleDataPermissionForm.vue';
+import RoleForm from './RoleForm.vue';
 
 defineOptions({ name: 'Application' });
 
@@ -153,8 +166,10 @@ const resetQuery = () => {
 
 /** 添加/修改操作 */
 const formRef = ref();
-const openForm = (type: string, id?: number) => {};
-
+const openForm = (type: string, id?: number) => {
+	console.log('type', type, id);
+	formRef.value.open(type, id);
+};
 /** 数据权限操作 */
 const dataPermissionFormRef = ref();
 const openDataPermissionForm = async (row: RoleApi.RoleVO) => {
