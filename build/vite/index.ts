@@ -2,7 +2,7 @@ import { resolve } from 'path'
 import Vue from '@vitejs/plugin-vue'
 import VueJsx from '@vitejs/plugin-vue-jsx'
 import progress from 'vite-plugin-progress'
-import EslintPlugin from 'vite-plugin-eslint'
+// import EslintPlugin from 'vite-plugin-eslint'
 import PurgeIcons from 'vite-plugin-purge-icons'
 import { ViteEjsPlugin } from 'vite-plugin-ejs'
 // @ts-ignore
@@ -73,10 +73,10 @@ export function createVitePlugins() {
       resolvers: [ElementPlusResolver()],
       exclude: [/[\\/]node_modules[\\/]/]
     }),
-    EslintPlugin({
-      cache: false,
-      include: ['src/**/*.vue', 'src/**/*.ts', 'src/**/*.tsx'] // 检查的文件
-    }),
+    // EslintPlugin({
+    //   cache: false,
+    //   include: ['src/**/*.vue', 'src/**/*.ts', 'src/**/*.tsx'] // 检查的文件
+    // }),
     VueI18nPlugin({
       runtimeOnly: true,
       compositionOnly: true,

@@ -1,7 +1,7 @@
 export const template = (isTaskListener) => {
-  return `
+	return `
   <div class="panel-tab__content">
-    <el-table :data="elementListenersList" size="small" border>
+    <el-table stripe :data="elementListenersList" size="small" border>
       <el-table-column label="序号" width="50px" type="index" />
       <el-table-column label="事件类型" min-width="100px" prop="event" />
       <el-table-column label="监听器类型" min-width="100px" show-overflow-tooltip :formatter="row => listenerTypeObject[row.listenerType]" />
@@ -98,27 +98,27 @@ export const template = (isTaskListener) => {
           </el-form-item>
         </template>
         ${
-          isTaskListener
-            ? "<el-form-item label='定时器类型' prop='eventDefinitionType' key='eventDefinitionType'>" +
-              "<el-select v-model='listenerForm.eventDefinitionType'>" +
-              "<el-option label='日期' value='date' />" +
-              "<el-option label='持续时长' value='duration' />" +
-              "<el-option label='循环' value='cycle' />" +
-              "<el-option label='无' value='' />" +
-              '</el-select>' +
-              '</el-form-item>' +
-              "<el-form-item v-if='!!listenerForm.eventDefinitionType' label='定时器' prop='eventDefinitions' key='eventDefinitions'>" +
-              "<el-input v-model='listenerForm.eventDefinitions' clearable />" +
-              '</el-form-item>'
-            : ''
-        }
+					isTaskListener
+						? "<el-form-item label='定时器类型' prop='eventDefinitionType' key='eventDefinitionType'>" +
+						  "<el-select v-model='listenerForm.eventDefinitionType'>" +
+						  "<el-option label='日期' value='date' />" +
+						  "<el-option label='持续时长' value='duration' />" +
+						  "<el-option label='循环' value='cycle' />" +
+						  "<el-option label='无' value='' />" +
+						  '</el-select>' +
+						  '</el-form-item>' +
+						  "<el-form-item v-if='!!listenerForm.eventDefinitionType' label='定时器' prop='eventDefinitions' key='eventDefinitions'>" +
+						  "<el-input v-model='listenerForm.eventDefinitions' clearable />" +
+						  '</el-form-item>'
+						: ''
+				}
       </el-form>
       <el-divider />
       <p class="listener-filed__title">
         <span><i class="el-icon-menu"></i>注入字段：</span>
         <el-button size="small" type="primary" @click="openListenerFieldForm(null)">添加字段</el-button>
       </p>
-      <el-table :data="fieldsListOfListener" size="small" max-height="240" border fit style="flex: none">
+      <el-table stripe :data="fieldsListOfListener" size="small" max-height="240" border fit style="flex: none">
         <el-table-column label="序号" width="50px" type="index" />
         <el-table-column label="字段名称" min-width="100px" prop="name" />
         <el-table-column label="字段类型" min-width="80px" show-overflow-tooltip :formatter="row => fieldTypeObject[row.fieldType]" />
@@ -174,5 +174,5 @@ export const template = (isTaskListener) => {
       </template>
     </el-dialog>
   </div>
-  `
-}
+  `;
+};
