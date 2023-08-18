@@ -50,9 +50,9 @@ export const useUserStore = defineStore('admin-user', {
         return null
       }
       let userInfo = wsCache.get(CACHE_KEY.USER)
-      if (!userInfo) {
-        userInfo = await getInfo()
-      }
+      userInfo = await getInfo()
+      // if (!userInfo) {
+      // }
       this.permissions = userInfo.permissions
       this.roles = userInfo.roles
       this.user = userInfo.user
