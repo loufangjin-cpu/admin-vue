@@ -1,48 +1,6 @@
 <template>
 	<ContentWrap>
-		<!-- 搜索工作栏 -->
-		<el-form ref="queryFormRef" :inline="true" :model="queryParams" class="-mb-15px" label-width="auto">
-			<el-form-item label="场景ID" prop="name">
-				<el-input v-model="queryParams.name" class="!w-240px" clearable placeholder="请输入角色名称" @keyup.enter="handleQuery" />
-			</el-form-item>
-			<el-form-item label="场景名称" prop="code">
-				<el-input v-model="queryParams.code" class="!w-240px" clearable placeholder="请输入角色标识" @keyup.enter="handleQuery" />
-			</el-form-item>
-			<el-form-item label="场景状态" prop="status">
-				<el-select v-model="queryParams.status" class="!w-240px" clearable placeholder="请选择状态">
-					<el-option v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)" :key="dict.value" :label="dict.label" :value="dict.value" />
-				</el-select>
-			</el-form-item>
-			<el-form-item label="场景类别" prop="status">
-				<el-select v-model="queryParams.status" class="!w-240px" clearable placeholder="请选择状态">
-					<el-option v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)" :key="dict.value" :label="dict.label" :value="dict.value" />
-				</el-select>
-			</el-form-item>
-			<el-form-item label="管理应用" prop="name">
-				<el-input v-model="queryParams.name" class="!w-240px" clearable placeholder="请输入角色名称" @keyup.enter="handleQuery" />
-			</el-form-item>
-			<el-form-item label="日期范围" prop="createTime">
-				<el-date-picker
-					v-model="queryParams.createTime"
-					:default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-					class="!w-240px"
-					end-placeholder="结束日期"
-					start-placeholder="开始日期"
-					type="daterange"
-					value-format="YYYY-MM-DD HH:mm:ss"
-				/>
-			</el-form-item>
-			<el-form-item>
-				<el-button @click="handleQuery">
-					<Icon class="mr-5px" icon="ep:search" />
-					搜索
-				</el-button>
-				<el-button @click="resetQuery">
-					<Icon class="mr-5px" icon="ep:refresh" />
-					重置
-				</el-button>
-			</el-form-item>
-		</el-form>
+		<QueryCondition ref="queryCondition" :opts="opts" :isShowOpen="true" :loading="loading" @submit="conditionEnter" />
 	</ContentWrap>
 
 	<!-- 列表 -->
@@ -69,29 +27,7 @@
 			</div>
 		</template>
 		<template v-if="curTabIndex === 1">
-			<el-table stripe v-loading="loading" :data="list">
-				<el-table-column align="center" label="应用ID" prop="id" />
-				<el-table-column align="center" label="应用名称" prop="name" />
-				<el-table-column align="center" label="应用状态" prop="type" />
-				<el-table-column align="center" label="应用类别" prop="code" />
-				<el-table-column align="center" label="所属单位" prop="sort" />
-				<el-table-column align="center" label="科室" prop="remark" />
-				<el-table-column align="center" label="状态" prop="status">
-					<template #default="scope">
-						<dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
-					</template>
-				</el-table-column>
-				<el-table-column :formatter="dateFormatter" align="center" label="创建时间" prop="createTime" width="180" />
-				<el-table-column :width="300" align="center" label="操作">
-					<template #default="scope">
-						<el-button link type="primary" @click="openForm('details', scope.row.id)"> 详情 </el-button>
-						<el-button link type="primary"> 预览 </el-button>
-						<el-button link type="primary" @click="openForm('update', scope.row.id)"> 编辑 </el-button>
-						<el-button link type="primary"> 发布 </el-button>
-						<el-button v-hasPermi="['system:role:delete']" link type="danger" @click="handleDelete(scope.row.id)"> 删除 </el-button>
-					</template>
-				</el-table-column>
-			</el-table>
+			<CustomTable title="某列render渲染" :table="table" :columns="table.columns" :isShowPagination="false" />
 		</template>
 		<!-- 分页 -->
 		<Pagination v-model:limit="queryParams.pageSize" v-model:page="queryParams.pageNo" :total="total" @pagination="getList" />
@@ -100,16 +36,13 @@
 	<!-- 表单弹窗：添加/修改 -->
 	<SceneForm ref="formRef" @success="getList" />
 </template>
-<script lang="ts" setup>
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict';
-import { dateFormatter } from '@/utils/formatTime';
-import download from '@/utils/download';
+<script lang="tsx" setup>
 import * as RoleApi from '@/api/system/role';
 import CustomTabs from '@/components/CustomTabs/CustomTabsModel.vue';
+import QueryCondition from '@/components/QueryCondition/src/index.vue';
+import CustomTable from '@/components/CustomTable/src/index.vue';
 import ModelSettings from '@/components/ModelSettings/ModelSettingsModel.vue';
 import SceneForm from './SceneForm.vue';
-// import RoleAssignMenuForm from './RoleAssignMenuForm.vue';
-// import RoleDataPermissionForm from './RoleDataPermissionForm.vue';
 
 defineOptions({ name: 'Application' });
 
@@ -119,6 +52,7 @@ const { t } = useI18n(); // 国际化
 const loading = ref(true); // 列表的加载中
 const total = ref(0); // 列表的总页数
 const list = ref([]); // 列表的数据
+
 const queryParams = reactive({
 	pageNo: 1,
 	pageSize: 10,
@@ -135,8 +69,7 @@ const queryParams = reactive({
 	mapThumbnail: '',
 	createTime: [],
 });
-const queryFormRef = ref(); // 搜索的表单
-const exportLoading = ref(false); // 导出的加载中
+
 const curTabIndex = ref(0);
 
 /** 查询角色列表 */
@@ -150,19 +83,263 @@ const getList = async () => {
 		loading.value = false;
 	}
 };
+// 查询数据
+const opts = computed(() => {
+	return {
+		// 基本输入框
+		mapId: {
+			label: '场景ID',
+			comp: 'el-input',
+		},
+		mapName: {
+			label: '场景名称',
+			comp: 'el-input',
+		},
+		// 联动查询
+		mapState: {
+			label: '场景状态',
+			comp: 'el-select',
+			defaultVal: 'W1',
+			event: {
+				change: (val) => {
+					// this.rowVal = val;
+					// this.likeBookNoList1 = ADDRESS_TYPES1;
+					return val;
+				},
+			},
+			// child: this?.likeBookNoList?.reduce((acc, cur) => {
+			// 	acc.push({
+			// 		comp: 'el-option',
+			// 		value: cur.key,
+			// 		bind: {
+			// 			label: cur.label,
+			// 			key: cur.key,
+			// 		},
+			// 	});
+			// 	return acc;
+			// }, []),
+		},
+		// 联动查询
+		mapType: {
+			label: '场景类别',
+			comp: 'el-select',
+			placeholder: '请先选择货源编号',
+			bind: (row) => {
+				console.log('row', row);
+				return {
+					// disabled: !this.rowVal,
+				};
+			},
+			// child: this?.likeBookNoList1?.reduce((acc, cur) => {
+			// 	acc.push({
+			// 		comp: 'el-option',
+			// 		value: cur.key,
+			// 		bind: {
+			// 			label: cur.label,
+			// 			key: cur.key,
+			// 		},
+			// 	});
+			// 	return acc;
+			// }, []),
+		},
+		mapThumbnail: {
+			label: '管理应用',
+			comp: 'el-select',
+			placeholder: '请先选择货源编号',
+			bind: (row) => {
+				console.log('row', row);
+				return {
+					// disabled: !this.rowVal,
+				};
+			},
+			// child: this?.likeBookNoList1?.reduce((acc, cur) => {
+			// 	acc.push({
+			// 		comp: 'el-option',
+			// 		value: cur.key,
+			// 		bind: {
+			// 			label: cur.label,
+			// 			key: cur.key,
+			// 		},
+			// 	});
+			// 	return acc;
+			// }, []),
+		},
+		// 自定义删格
+		createTime: {
+			label: '日期范围',
+			comp: 'el-date-picker',
+			// span: 2,
+			defaultVal: [new Date('1 00:00:00'), new Date('1 23:59:59')],
+			bind: {
+				type: 'daterange',
+				rangeSeparator: '-',
+				startPlaceholder: '开始日期',
+				endPlaceholder: '结束日期',
+				valueFormat: 'YYYY-MM-DD HH:mm:ss',
+			},
+		},
+	};
+});
 
-/** 搜索按钮操作 */
-const handleQuery = () => {
-	queryParams.pageNo = 1;
-	getList();
+const table = computed(() => {
+	return {
+		// 接口返回数据
+		data: [
+			{
+				id: '1',
+				date: '2019-09-25',
+				date1: '2019-09-26',
+				name: '张三',
+				status: '2',
+				address: '广东省广州市天河区',
+			},
+			{
+				id: '2',
+				date: '2019-09-26',
+				date1: '2019-09-27',
+				name: '张三1',
+				status: '1',
+				address: '广东省广州市天广东省广州市天河区2广东省广州市天河区2河区2',
+			},
+			{
+				id: '3',
+				date: '2019-09-26',
+				date1: '2019-09-28',
+				name: '张三1',
+				status: '1',
+				address: '广东省广州市天广东省广州市天河区2广东省广州市天河区2河区2',
+			},
+			{
+				id: '4',
+				date: '2019-09-26',
+				date1: '2019-09-29',
+				name: '张三1',
+				status: '1',
+				address: '广东省广州市天广东省广州市天河区2广东省广州市天河区2河区2',
+			},
+		],
+		// 表头数据
+		columns: [
+			{ prop: 'mapId', label: '场景ID', minWidth: '100' },
+			{ prop: 'mapName', label: '场景名称', minWidth: '180' },
+			{
+				prop: 'mapCode',
+				label: '场景类别',
+				minWidth: '220',
+				render: (val) => {
+					let label;
+					switch (val) {
+						case '1':
+							label = '待办';
+							break;
+						case '2':
+							label = '待提交';
+							break;
+						case '3':
+							label = '完成';
+							break;
+					}
+					return <div>{label}</div>;
+				},
+			},
+			{
+				prop: 'mapState',
+				label: '场景状态',
+				minWidth: '220',
+				render: (val) => {
+					let label;
+					switch (val) {
+						case '1':
+							label = '已发布';
+							break;
+						case '2':
+							label = '未发布';
+							break;
+					}
+					return <div>{label}</div>;
+				},
+			},
+			{
+				prop: 'remark',
+				label: '关联应用',
+				minWidth: '220',
+			},
+			{
+				prop: 'mapThumbnail',
+				label: '场景缩略图',
+				minWidth: '220',
+			},
+			{
+				prop: 'createTime',
+				label: '更新时间',
+				minWidth: '220',
+			},
+		],
+		operator: [
+			{
+				text: '详情',
+				fun: (row, index) => {
+					console.log('row', row, index);
+				},
+			},
+			{
+				text: '预览',
+				fun: (row, index) => {
+					console.log('row', row, index);
+				},
+			},
+			{
+				text: '编辑',
+				fun: (row, index) => {
+					console.log('row', row, index);
+				},
+			},
+			{
+				text: '发布',
+				fun: (row, index) => {
+					console.log('row', row, index);
+				},
+			},
+			{
+				text: '复制',
+				fun: (row, index) => {
+					console.log('row', row, index);
+				},
+			},
+			{
+				text: '删除',
+				fun: async (row, index) => {
+					console.log('row', row, index);
+					try {
+						// 删除的二次确认
+						await message.delConfirm();
+						// 发起删除
+						// await RoleApi.deleteRole(id);
+						message.success(t('common.delSuccess'));
+						// 刷新列表
+						// await getList();
+					} catch {}
+				},
+			},
+		],
+		operatorConfig: {
+			fixed: 'right', // 固定列表右边（left则固定在左边）
+			width: 160,
+			label: '操作',
+		},
+	};
+});
+// 点击查询按钮
+const conditionEnter = (data) => {
+	console.log('查询条件', data);
+	console.log('params', queryParams);
+	loading.value = true;
+	// queryParams = data;
+	console.log('data', data);
+	setTimeout(() => {
+		loading.value = false;
+	}, 2000);
 };
-
-/** 重置按钮操作 */
-const resetQuery = () => {
-	queryFormRef.value.resetFields();
-	handleQuery();
-};
-
 /** 添加/修改操作 */
 const formRef = ref();
 const openForm = (type: string, id?: number) => {
@@ -170,49 +347,9 @@ const openForm = (type: string, id?: number) => {
 	formRef.value.open(type, id);
 };
 
-/** 数据权限操作 */
-const dataPermissionFormRef = ref();
-const openDataPermissionForm = async (row: RoleApi.RoleVO) => {
-	dataPermissionFormRef.value.open(row);
-};
-
-/** 菜单权限操作 */
-const assignMenuFormRef = ref();
-const openAssignMenuForm = async (row: RoleApi.RoleVO) => {
-	assignMenuFormRef.value.open(row);
-};
-
 const showTabs = (index) => {
 	curTabIndex.value = index;
 };
-/** 删除按钮操作 */
-const handleDelete = async (id: number) => {
-	try {
-		// 删除的二次确认
-		await message.delConfirm();
-		// 发起删除
-		await RoleApi.deleteRole(id);
-		message.success(t('common.delSuccess'));
-		// 刷新列表
-		await getList();
-	} catch {}
-};
-
-/** 导出按钮操作 */
-const handleExport = async () => {
-	try {
-		// 导出的二次确认
-		await message.exportConfirm();
-		// 发起导出
-		exportLoading.value = true;
-		const data = await RoleApi.exportRole(queryParams);
-		download.excel(data, '角色列表.xls');
-	} catch {
-	} finally {
-		exportLoading.value = false;
-	}
-};
-
 /** 初始化 **/
 onMounted(() => {
 	getList();
