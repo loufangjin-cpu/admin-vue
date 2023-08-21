@@ -39,7 +39,7 @@ const loginOut = () => {
 		.then(async () => {
 			await userStore.loginOut();
 			tagsViewStore.delAllViews();
-			replace('/login?redirect=/index');
+			replace('/login?redirect=/grap/index');
 		})
 		.catch(() => {});
 };

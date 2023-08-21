@@ -3,7 +3,10 @@
 		<slot></slot>
 	</div>
 </template>
-<script></script>
+<script lang="ts" setup>
+defineOptions({ name: 'ContentTitle' });
+</script>
+
 <style lang="scss" scoped>
 .chart-content {
 	margin-top: 14px;
